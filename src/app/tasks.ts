@@ -25,16 +25,16 @@ const user2: User = {
 
 //2
 
-interface Car {
+interface ICar {
   brand: string;
   model: string;
   year: number;
   isElectric: boolean;
 }
 
-const car1: Car = { brand: "Tesla", model: "Model 3", year: 2023, isElectric: true };
-const car2: Car = { brand: "BMW", model: "M5", year: 2021, isElectric: false };
-const car3: Car = { brand: "Nissan", model: "Leaf", year: 2020, isElectric: true };
+const car1: ICar = { brand: "Tesla", model: "Model 3", year: 2023, isElectric: true };
+const car2: ICar = { brand: "BMW", model: "M5", year: 2021, isElectric: false };
+const car3: ICar = { brand: "Nissan", model: "Leaf", year: 2020, isElectric: true };
 
 //3
 
@@ -329,3 +329,180 @@ type UserWithoutPassword = Omit<FullUser, "password">;
 //31
 
 type ImmutableUser = Readonly<FullUser>;
+
+//32
+
+type User2 = {
+  name: string;
+  email: string;
+  age: number;
+};
+
+type userProperty = keyof User2;
+
+let userProp: userProperty;
+
+userProp = "name"; // სწორია
+//userProp = "address"; - Type '"address"' is not assignable to type '"name" | "email" | "age"'.
+
+//33
+
+const user = {
+  age: 19,
+  name: "elene",
+  email: "elene@gmail.com"
+};
+
+type UserType1 = typeof user;
+
+//34
+
+class Personn {
+  name: string;
+  age: number;
+
+  constructor(name: string, age: number) {
+    this.name = name;
+    this.age = age;
+  }
+}
+
+const person1 = new Personn("elene", 19);
+const person2 = new Personn("nata", 20);
+
+console.log(person1); 
+console.log(person2); 
+
+//35
+
+class BankAccount {
+  owner: string;
+  balance: number;
+
+  constructor(owner: string, initialBalance: number = 0) {
+    this.owner = owner;
+    this.balance = initialBalance;
+  }
+
+  deposit(amount: number): void {
+    this.balance += amount;
+    console.log(`ჩაირიცხა: ${amount}, ბალანსზე გაქვთ: ${this.balance}`);
+  }
+
+  withdraw(amount: number): void {
+    if (amount > this.balance) return console.log("არასაკმარისი თანხა ანგარიშზე");
+    this.balance -= amount;
+    console.log(`გატანილია: ${amount}, ბალანსზე გაქვთ: ${this.balance}`);
+  }
+}
+
+const myAccount = new BankAccount("elene", 1000);
+myAccount.deposit(500);
+myAccount.withdraw(300);
+myAccount.withdraw(1500); // tanxa ar aris sakmari
+
+//36
+
+class Car {
+  brand: string;
+  model: string;
+  year: number;
+
+  constructor(brand: string, model: string, year: number) {
+    this.brand = brand;
+    this.model = model;
+    this.year = year;
+  }
+
+  getCarInfo(): string {
+    return `${this.brand} ${this.model} (${this.year})`;
+  } 
+}
+
+const myCar = new Car("Tesla", "Model 3", 2023);
+
+//37
+
+type UserRole = "admin" | "customer";
+type OrderStatus1 = "pending" | "shipped" | "delivered";
+
+interface User1 {
+  readonly id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+  phone?: string; 
+}
+
+interface Product1 {
+  readonly id: number;
+  name: string;
+  price: number;
+  stock: number;
+}
+
+interface Order {
+  readonly id: number;
+  user: User1;
+  products: Product1[];
+  status: OrderStatus1; 
+}
+
+class Shop {
+  users: User1[] = [];
+  products: Product1[] = [];
+  orders: Order[] = [];
+
+  createUser(name: string, email: string, role: UserRole, phone?: string): User1 {
+    const newUser: User1 = { id: this.users.length + 1, name, email, role, phone };
+    this.users.push(newUser);
+    return newUser;
+  }
+
+  createProduct(name: string, price: number, stock: number): Product1 {
+    const newProduct: Product1 = { id: this.products.length + 1, name, price, stock };
+    this.products.push(newProduct);
+    return newProduct;
+  }
+
+  getProcutPrice(productId: number): number | undefined {
+    return this.products.find(p => p.id === productId)?.price;
+  }
+  
+createOrder(user: User1, products: Product1[]): Order {
+    const order: Order = {
+      id: this.orders.length + 1,
+      user,
+      products,
+      status: "pending"
+    };
+    this.orders.push(order);
+    return order;
+  }
+  
+  updateOrderStatus(orderId: number, status: OrderStatus1): void {
+    const order = this.orders.find(o => o.id === orderId);
+    if (order) {
+      order.status = status;
+    }
+  }
+
+  getProducts(): Product1[] {
+    return this.products;
+  }
+
+  updateUser(userID: number, updateData : Partial<User1>): void {
+    const user = this.users.find(u => u.id === userID);
+    if (user) {
+      Object.assign(user, updateData);
+    }
+  }
+}
+
+const shop = new Shop();
+const user3 = shop.createUser("elene", "elene@gmail.com", "customer"); 
+const product1 = shop.createProduct("Laptop", 2500, 10);
+const order1 = shop.createOrder(user3, [product1]);
+console.log(order1);
+shop.updateOrderStatus(order1.id, "shipped");
+console.log(order1);
